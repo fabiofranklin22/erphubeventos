@@ -6,6 +6,7 @@
   <title>CAV 2026 — Dashboard de Vendas</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -320,48 +321,43 @@
 
     /* ─── LOGIN GATE ─── */
     #login-gate {
-      position: fixed; inset: 0; z-index: 9999;
-      background: #0d0a08;
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: var(--bg); z-index: 99999;
       display: flex; align-items: center; justify-content: center;
+      flex-direction: column;
     }
+    #login-gate.hidden { display: none; }
     .login-box {
-      background: #1c1712;
-      border: 1px solid rgba(249,115,22,0.25);
-      border-radius: 20px;
-      padding: 44px 48px;
-      width: 380px;
-      display: flex; flex-direction: column; align-items: center; gap: 24px;
-      box-shadow: 0 0 60px rgba(249,115,22,0.08);
+      background: var(--card); border: 1px solid var(--border2);
+      border-radius: 16px; padding: 40px 36px; text-align: center;
+      width: min(380px, 90vw);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
     }
-    .login-logo {
-      font-size: 38px; font-weight: 900;
-      background: linear-gradient(135deg, #f97316, #ec4899);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      letter-spacing: 3px;
+    .login-box h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    .login-box p { font-size: 13px; color: var(--sub); margin-bottom: 24px; }
+    .login-box input {
+      width: 100%; padding: 12px 16px; border-radius: 10px;
+      border: 1px solid var(--border2); background: var(--bg2);
+      color: var(--text); font-size: 14px; outline: none;
+      margin-bottom: 16px; text-align: center; letter-spacing: 2px;
     }
-    .login-sub { font-size: 12px; color: #5c4f42; letter-spacing: 1.5px; text-transform: uppercase; margin-top: -16px; }
-    .login-label { width: 100%; font-size: 11px; font-weight: 700; color: #5c4f42; text-transform: uppercase; letter-spacing: 1px; margin-bottom: -16px; }
-    .login-input {
-      width: 100%;
-      background: #251f18;
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 10px; padding: 13px 16px;
-      font-size: 14px; font-family: 'Inter', sans-serif;
-      color: #f5ede4; outline: none;
-      transition: border-color .2s;
+    .login-box input:focus { border-color: var(--purple); }
+    .login-box button {
+      width: 100%; padding: 12px; border-radius: 10px; border: none;
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      color: #fff; font-weight: 700; font-size: 14px; cursor: pointer;
+      transition: opacity .2s;
     }
-    .login-input:focus { border-color: #f97316; }
-    .login-btn {
-      width: 100%;
-      background: linear-gradient(135deg, #f97316, #ec4899);
-      border: none; border-radius: 10px; padding: 14px;
-      font-size: 14px; font-weight: 800; color: #fff;
-      cursor: pointer; letter-spacing: 0.5px;
-      transition: opacity .18s, transform .18s;
+    .login-box button:hover { opacity: .85; }
+    .login-error { color: var(--red); font-size: 12px; margin-top: 8px; display: none; }
+
+    /* ─── MKT PASSWORD MODAL ─── */
+    #mkt-gate {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.84); z-index: 99998;
+      display: none; align-items: center; justify-content: center;
     }
-    .login-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-    .login-error { font-size: 12px; color: #fb7185; display: none; }
-    .login-footer { font-size: 10px; color: #3d3028; }
+    #mkt-gate.open { display: flex; }
   
   
 /* ── Drilldown Modal ───────────────────────────────────────────── */
@@ -441,70 +437,100 @@
 #pm-tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); }
 #pm-tbody tr:hover { background: rgba(255,255,255,0.035); }
 #pm-tbody td { padding: 7px 12px; font-size: 12px; }
+
+/* ══════ CAMPANHA WHATSAPP ══════ */
+.seg-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+}
+.seg-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+.seg-fanatico::before { background: linear-gradient(90deg, #a855f7, #ec4899); }
+.seg-quente::before  { background: linear-gradient(90deg, #f97316, #ef4444); }
+.seg-recente::before { background: linear-gradient(90deg, #3b82f6, #06b6d4); }
+.seg-resgate::before { background: linear-gradient(90deg, #eab308, #f97316); }
+.seg-frio::before    { background: linear-gradient(90deg, #64748b, #94a3b8); }
+
+.seg-card .seg-name { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+.seg-fanatico .seg-name { color: #a855f7; }
+.seg-quente .seg-name   { color: #f97316; }
+.seg-recente .seg-name  { color: #3b82f6; }
+.seg-resgate .seg-name  { color: #eab308; }
+.seg-frio .seg-name     { color: var(--muted); }
+
+.seg-card .seg-desc       { font-size: 12px; color: var(--sub); margin-bottom: 16px; }
+.seg-card .seg-count      { font-size: 36px; font-weight: 700; color: var(--text); }
+.seg-card .seg-count-label{ font-size: 12px; color: var(--sub); }
+.seg-card .seg-meta       { margin-top: 16px; display: flex; gap: 16px; flex-wrap: wrap; }
+.seg-meta-item            { display: flex; flex-direction: column; gap: 2px; }
+.seg-meta-item .meta-val  { font-size: 18px; font-weight: 600; color: var(--text); }
+.seg-meta-item .meta-label{ font-size: 11px; color: var(--sub); }
+
+/* Funnel */
+.funnel-step { display: flex; align-items: center; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.funnel-step:last-child { border-bottom: none; }
+.funnel-bar-container { flex: 1; height: 32px; background: rgba(255,255,255,0.03); border-radius: 6px; overflow: hidden; position: relative; }
+.funnel-bar { height: 100%; border-radius: 6px; transition: width 1s ease; display: flex; align-items: center; padding-left: 12px; font-size: 13px; font-weight: 600; min-width: fit-content; }
+.funnel-label { width: 140px; font-size: 13px; color: var(--sub); flex-shrink: 0; }
+.funnel-value { width: 80px; text-align: right; font-size: 15px; font-weight: 600; color: var(--text); flex-shrink: 0; }
+
+/* Segment tags in contacts table */
+.seg-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+.seg-tag-fanatico { background: rgba(168,85,247,0.15); color: #a855f7; }
+.seg-tag-quente   { background: rgba(249,115,22,0.15); color: #f97316; }
+.seg-tag-recente  { background: rgba(59,130,246,0.15); color: #3b82f6; }
+.seg-tag-resgate  { background: rgba(234,179,8,0.15); color: #eab308; }
+.seg-tag-frio     { background: rgba(148,163,184,0.15); color: var(--muted); }
+
+/* Template cards */
+.tpl-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+.tpl-name { font-size: 13px; font-weight: 600; font-family: monospace; color: var(--text); margin-bottom: 8px; }
+.tpl-status { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; }
+.tpl-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.tpl-dot-pending  { background: var(--amber); }
+.tpl-dot-approved { background: var(--green); }
+.tpl-dot-rejected { background: var(--red); }
+
+#camp-contacts-body tr { border-bottom: 1px solid rgba(255,255,255,0.04); }
+#camp-contacts-body tr:hover { background: rgba(124,106,240,0.04); }
+#camp-contacts-body td { padding: 10px 16px; font-size: 12px; }
 </style>
 </head>
 <body>
-<!-- PASSWORD OVERLAY -->
-<div id="auth-overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#080c16;z-index:9999;display:flex;align-items:center;justify-content:center;">
-  <div style="background:#131929;border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:40px 36px;width:380px;text-align:center;">
-    <div style="font-size:2rem;margin-bottom:12px;">⚡</div>
-    <div style="font-size:18px;font-weight:800;color:#e8edf5;margin-bottom:4px;">A Hub · ERP de Eventos</div>
-    <div style="font-size:12px;color:#8892a4;margin-bottom:28px;">Digite a senha para acessar o dashboard</div>
-    <input id="auth-pass" type="password" placeholder="Senha de acesso" 
-      style="width:100%;padding:12px 16px;background:#0e1422;border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:#e8edf5;font-size:14px;font-family:Inter,sans-serif;outline:none;margin-bottom:12px;"
-      onkeydown="if(event.key==='Enter')checkAuth()">
-    <button onclick="checkAuth()" 
-      style="width:100%;padding:12px;background:linear-gradient(135deg,#f97316,#ec4899);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;font-family:Inter,sans-serif;cursor:pointer;transition:opacity .2s;"
-      onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
-      Entrar
-    </button>
-    <div id="auth-error" style="margin-top:12px;font-size:12px;color:#f43f5e;display:none;">Senha incorreta. Tente novamente.</div>
-  </div>
-</div>
-<script>
-function checkAuth() {
-  const pass = document.getElementById('auth-pass').value;
-  if (pass === 'cav2026hub') {
-    document.getElementById('auth-overlay').style.display = 'none';
-    sessionStorage.setItem('auth', '1');
-  } else {
-    document.getElementById('auth-error').style.display = 'block';
-    document.getElementById('auth-pass').style.borderColor = '#f43f5e';
-  }
-}
-if (sessionStorage.getItem('auth') === '1') {
-  document.getElementById('auth-overlay').style.display = 'none';
-}
-</script>
-
-
+<!-- ═══ LOGIN GATE ═══ -->
 <div id="login-gate">
   <div class="login-box">
-    <div class="login-logo">⚡ CAV</div>
-    <div class="login-sub">Dashboard de Vendas · 2026</div>
-    <div class="login-label">Senha de acesso</div>
-    <input class="login-input" id="login-pw" type="password" placeholder="••••••••••" 
-           onkeydown="if(event.key==='Enter') checkLogin()" autocomplete="off" />
-    <div class="login-error" id="login-err">Senha incorreta. Tente novamente.</div>
-    <button class="login-btn" onclick="checkLogin()">Entrar no Dashboard</button>
-    <div class="login-footer">Somosahub · Uso interno</div>
+    <div style="font-size:40px;margin-bottom:12px;">⚡</div>
+    <h2>A Hub — ERP</h2>
+    <p>Digite a senha para acessar o painel</p>
+    <input type="password" id="login-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    <button onclick="doLogin()">Entrar</button>
+    <div class="login-error" id="login-err">Senha incorreta</div>
   </div>
 </div>
-<script>
-  function checkLogin() {
-    const pw = document.getElementById('login-pw').value;
-    if (pw === 'Eventos1mi') {
-      document.getElementById('login-gate').style.display = 'none';
-    } else {
-      const err = document.getElementById('login-err');
-      err.style.display = 'block';
-      document.getElementById('login-pw').value = '';
-      document.getElementById('login-pw').focus();
-      setTimeout(() => err.style.display = 'none', 3000);
-    }
-  }
-  document.getElementById('login-pw').focus();
-</script>
+
+<!-- ═══ MKT PASSWORD GATE ═══ -->
+<div id="mkt-gate">
+  <div class="login-box">
+    <div style="font-size:40px;margin-bottom:12px;">📈</div>
+    <h2>Marketing</h2>
+    <p>Área restrita — digite a senha do Marketing</p>
+    <input type="password" id="mkt-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doMktLogin()">
+    <button onclick="doMktLogin()">Acessar Marketing</button>
+    <div class="login-error" id="mkt-err">Senha incorreta</div>
+    <div style="margin-top:12px;"><a href="#" onclick="document.getElementById('mkt-gate').classList.remove('open');return false;" style="color:var(--sub);font-size:12px;text-decoration:none;">← Voltar</a></div>
+  </div>
+</div>
+
+
 
 <div class="app">
 
@@ -537,6 +563,24 @@ if (sessionStorage.getItem('auth') === '1') {
     </div>
     <div class="nav-item nav-soon">
       <span class="nav-icon">⚽</span> MEDCUP <span class="soon-badge">em breve</span>
+    </div>
+
+    <!-- ── CAMPANHA DE VENDAS ── -->
+    <div class="sidebar-section">📢 Campanha WhatsApp</div>
+    <div class="nav-item" data-section="campanha" data-event="cav2026" onclick="switchSection('campanha','cav2026',this)">
+      <span class="nav-icon">💬</span> CAV 2026 <span class="soon-badge" style="background:rgba(34,211,160,0.15);color:var(--green);">novo</span>
+    </div>
+
+    <!-- ── MARKETING ── -->
+    <div class="sidebar-section">📈 Marketing</div>
+    <div class="nav-item" onclick="mktNav('https://marketingcav.manus.space/')">
+      <span class="nav-icon">📊</span> Performance <span style="font-size:9px;color:var(--muted);margin-left:auto;">↗</span>
+    </div>
+    <div class="nav-item" onclick="mktNav('https://marketingcav.manus.space/instagram')">
+      <span class="nav-icon">📸</span> Instagram <span style="font-size:9px;color:var(--muted);margin-left:auto;">↗</span>
+    </div>
+    <div class="nav-item" onclick="mktNav('https://marketingcav.manus.space/plano-de-midia')">
+      <span class="nav-icon">📋</span> Plano de Mídia <span style="font-size:9px;color:var(--muted);margin-left:auto;">↗</span>
     </div>
 
     <!-- ── TRÁFEGO PAGO ── -->
@@ -2258,6 +2302,83 @@ if (sessionStorage.getItem('auth') === '1') {
 
       </div><!-- /page-trafego -->
 
+      <!-- ═══ PAGE: CAMPANHA DE VENDAS ═══ -->
+      <div class="page" id="page-campanha" style="padding:0 4px;">
+
+        <!-- Stats -->
+        <div class="kpi-grid" id="camp-stats">
+          <div class="kpi-card purple"><div class="kpi-label">Total Contatos</div><div class="kpi-value" id="camp-total">—</div><div class="kpi-footer">base completa</div><div class="kpi-icon">👥</div></div>
+          <div class="kpi-card green"><div class="kpi-label">Contatos CAV</div><div class="kpi-value" id="camp-cav">—</div><div class="kpi-footer">segmentados</div><div class="kpi-icon">🎯</div></div>
+          <div class="kpi-card blue"><div class="kpi-label">Com Telefone</div><div class="kpi-value" id="camp-phone">—</div><div class="kpi-footer">p/ WhatsApp</div><div class="kpi-icon">📱</div></div>
+          <div class="kpi-card amber"><div class="kpi-label">Total Compras</div><div class="kpi-value" id="camp-compras">—</div><div class="kpi-footer">registros</div><div class="kpi-icon">🛒</div></div>
+        </div>
+
+        <!-- Sub-nav -->
+        <div id="subnav-campanha" style="display:flex;gap:4px;margin:16px 0;background:var(--card);padding:4px;border-radius:10px;border:1px solid var(--border);width:fit-content;">
+          <button class="chip active" onclick="switchCampTab('segmentos',this)">Segmentos</button>
+          <button class="chip" onclick="switchCampTab('funil',this)">Funil</button>
+          <button class="chip" onclick="switchCampTab('templates',this)">Templates</button>
+          <button class="chip" onclick="switchCampTab('contatos',this)">Contatos</button>
+        </div>
+
+        <!-- Segmentos -->
+        <div id="camp-tab-segmentos">
+          <div class="kpi-grid" id="camp-segments-grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));">
+            <div style="padding:40px;color:var(--sub);text-align:center;">Carregando segmentos...</div>
+          </div>
+        </div>
+
+        <!-- Funil -->
+        <div id="camp-tab-funil" style="display:none;">
+          <div id="camp-funnel" style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;">
+            <div style="padding:40px;color:var(--sub);text-align:center;">Carregando funil...</div>
+          </div>
+        </div>
+
+        <!-- Templates -->
+        <div id="camp-tab-templates" style="display:none;">
+          <div class="kpi-grid" id="camp-templates-grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));"></div>
+        </div>
+
+        <!-- Contatos -->
+        <div id="camp-tab-contatos" style="display:none;">
+          <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
+            <span style="font-size:12px;color:var(--sub);" id="camp-contact-count">Carregando...</span>
+            <select id="camp-seg-filter" onchange="campFilterContacts()" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:7px;font-size:11px;">
+              <option value="">Todos</option>
+              <option value="FANATICO">Fanático</option>
+              <option value="QUENTE">Quente</option>
+              <option value="RECENTE">Recente</option>
+              <option value="RESGATE">Resgate</option>
+              <option value="FRIO">Frio</option>
+            </select>
+            <input type="text" id="camp-search" placeholder="Buscar nome ou e-mail..." oninput="campFilterContacts()" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:7px;font-size:11px;width:220px;">
+          </div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+            <div style="overflow-x:auto;">
+              <table style="width:100%;border-collapse:collapse;" id="camp-table">
+                <thead><tr>
+                  <th style="text-align:left;padding:10px 16px;font-size:10px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);cursor:pointer;" onclick="campSort('nome')">Nome ↕</th>
+                  <th style="text-align:left;padding:10px 16px;font-size:10px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);cursor:pointer;" onclick="campSort('email')">E-mail ↕</th>
+                  <th style="text-align:left;padding:10px 16px;font-size:10px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);">Telefone</th>
+                  <th style="text-align:left;padding:10px 16px;font-size:10px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);cursor:pointer;" onclick="campSort('segmento')">Segmento ↕</th>
+                  <th style="text-align:center;padding:10px 16px;font-size:10px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);cursor:pointer;" onclick="campSort('total_edicoes')">Edições ↕</th>
+                </tr></thead>
+                <tbody id="camp-contacts-body"><tr><td colspan="5" style="padding:30px;text-align:center;color:var(--sub);">Carregando contatos...</td></tr></tbody>
+              </table>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-top:1px solid var(--border);font-size:11px;color:var(--sub);">
+              <span id="camp-page-info">—</span>
+              <div style="display:flex;gap:6px;">
+                <button onclick="campPrev()" id="camp-prev-btn" disabled style="background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:10px;">← Anterior</button>
+                <button onclick="campNext()" id="camp-next-btn" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:10px;">Próxima →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /page-campanha -->
+
     </div><!-- /content -->
   </div><!-- /main -->
 </div><!-- /app -->
@@ -2431,6 +2552,12 @@ function switchSection(section, event, el) {
       document.getElementById('page-title').textContent = 'Tráfego Pago · CAV 2026';
       document.getElementById('page-sub').textContent = 'Facebook Ads + Diagnóstico Instagram · @jogoscav';
       setTimeout(buildTrafegoCharts, 50);
+    }
+    if (section === 'campanha' && event === 'cav2026') {
+      document.getElementById('page-campanha').classList.add('active');
+      document.getElementById('page-title').textContent = 'Campanha WhatsApp · CAV 2026';
+      document.getElementById('page-sub').textContent = 'Segmentação + Funil + Templates Kapso';
+      setTimeout(loadCampanhaData, 50);
     }
   }
 }
@@ -5531,6 +5658,277 @@ function buildTrafegoCharts() {
         }
       }
     });
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// CAMPANHA WHATSAPP — Supabase integration
+// ══════════════════════════════════════════════════════════════════
+const CAMP_SUPA_URL = 'https://ywfiglqgqiruckqjuvbz.supabase.co';
+const CAMP_SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3ZmlnbHFncWlydWNrcWp1dmJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NTU4MzYsImV4cCI6MjA4OTUzMTgzNn0.7xjOF9mLnldp5P3t_Gs92wvoq60te_8nE58jzmsQ-Ig';
+
+let campSB = null;
+let campAllContacts = [];
+let campFiltered = [];
+let campPage = 0;
+const CAMP_PAGE_SIZE = 50;
+let campSortCol = 'nome';
+let campSortAsc = true;
+let campDataLoaded = false;
+
+const campSegmentDefs = [
+  { key: 'fanatico', name: 'FANÁTICO', desc: '3+ edições da CAV', color: '#a855f7', icon: '💜', channel: 'WhatsApp' },
+  { key: 'quente',   name: 'QUENTE',   desc: '2024 + 2025',       color: '#f97316', icon: '🔥', channel: 'WhatsApp' },
+  { key: 'recente',  name: 'RECENTE',  desc: 'Só 2025',           color: '#3b82f6', icon: '🆕', channel: 'WhatsApp' },
+  { key: 'resgate',  name: 'RESGATE',  desc: '2024 sem 2025',     color: '#eab308', icon: '📢', channel: 'WhatsApp' },
+  { key: 'frio',     name: 'FRIO',     desc: 'CAV antiga, sem 2024/2025', color: '#94a3b8', icon: '❄️', channel: 'E-mail' }
+];
+
+const campTemplateData = [
+  { name: 'cav2026_fanatico', segment: 'FANÁTICO', status: 'submitted', metaId: '1331157812168888' },
+  { name: 'cav2026_quente',   segment: 'QUENTE',   status: 'submitted', metaId: '1471481821224285' },
+  { name: 'cav2026_recente',  segment: 'RECENTE',  status: 'submitted', metaId: '969264105527244' },
+  { name: 'cav2026_resgate',  segment: 'RESGATE',  status: 'submitted', metaId: '918582494299500' }
+];
+
+function initCampSB() {
+  if (campSB) return;
+  try {
+    campSB = window.supabase.createClient(CAMP_SUPA_URL, CAMP_SUPA_KEY);
+  } catch(e) {
+    console.error('Supabase init error:', e);
+  }
+}
+
+async function loadCampanhaData() {
+  if (campDataLoaded) return; // don't reload every time
+  initCampSB();
+  if (!campSB) return;
+  try {
+    await Promise.all([campLoadStats(), campLoadSegments(), campLoadContacts()]);
+    campRenderTemplates();
+    campDataLoaded = true;
+  } catch(e) {
+    console.error('Campanha load error:', e);
+  }
+}
+
+async function campLoadStats() {
+  try {
+    const [contacts, compras, eventos, phones] = await Promise.all([
+      campSB.from('contacts').select('*', { count: 'exact', head: true }),
+      campSB.from('compras').select('*', { count: 'exact', head: true }),
+      campSB.from('compras').select('evento'),
+      campSB.from('contacts').select('*', { count: 'exact', head: true }).not('telefone', 'is', null).neq('telefone', '')
+    ]);
+    document.getElementById('camp-total').textContent = (contacts.count || 0).toLocaleString('pt-BR');
+    document.getElementById('camp-compras').textContent = (compras.count || 0).toLocaleString('pt-BR');
+    document.getElementById('camp-phone').textContent = (phones.count || 0).toLocaleString('pt-BR');
+    // CAV count will be set by loadSegments
+  } catch(e) { console.error('Camp stats error:', e); }
+}
+
+async function campLoadSegments() {
+  const segCounts = {};
+  const segPhones = {};
+  let totalCav = 0;
+
+  for (const seg of campSegmentDefs) {
+    try {
+      const { data, error } = await campSB.from('vw_seg_' + seg.key).select('*');
+      if (error) { segCounts[seg.key] = '?'; segPhones[seg.key] = '?'; continue; }
+      const total = data ? data.length : 0;
+      const withPhone = data ? data.filter(c => c.telefone && c.telefone.length > 5).length : 0;
+      segCounts[seg.key] = total;
+      segPhones[seg.key] = withPhone;
+      totalCav += total;
+    } catch(e) { segCounts[seg.key] = '?'; segPhones[seg.key] = '?'; }
+  }
+
+  document.getElementById('camp-cav').textContent = totalCav.toLocaleString('pt-BR');
+
+  // Render segment cards
+  let html = '';
+  for (const seg of campSegmentDefs) {
+    const count = segCounts[seg.key];
+    const phones = segPhones[seg.key];
+    html += '<div class="seg-card seg-' + seg.key + '">'
+      + '<div class="seg-name">' + seg.icon + ' ' + seg.name + '</div>'
+      + '<div class="seg-desc">' + seg.desc + '</div>'
+      + '<div class="seg-count">' + (typeof count === 'number' ? count.toLocaleString('pt-BR') : count) + '</div>'
+      + '<div class="seg-count-label">contatos</div>'
+      + '<div class="seg-meta">'
+      +   '<div class="seg-meta-item"><span class="meta-val">' + (typeof phones === 'number' ? phones.toLocaleString('pt-BR') : phones) + '</span><span class="meta-label">com telefone</span></div>'
+      +   '<div class="seg-meta-item"><span class="meta-val">' + seg.channel + '</span><span class="meta-label">canal</span></div>'
+      + '</div></div>';
+  }
+  document.getElementById('camp-segments-grid').innerHTML = html;
+
+  // Render funnel
+  const funnelSteps = [
+    { label: 'Base Total CAV', value: totalCav, color: '#64748b' },
+    { label: 'WhatsApp (tel)', value: (segPhones.fanatico||0)+(segPhones.quente||0)+(segPhones.recente||0)+(segPhones.resgate||0), color: '#22c55e' },
+    { label: 'Fanático', value: segCounts.fanatico||0, color: '#a855f7' },
+    { label: 'Quente', value: segCounts.quente||0, color: '#f97316' },
+    { label: 'Recente', value: segCounts.recente||0, color: '#3b82f6' },
+    { label: 'Resgate', value: segCounts.resgate||0, color: '#eab308' },
+    { label: 'Frio (e-mail)', value: segCounts.frio||0, color: '#94a3b8' }
+  ];
+  const maxVal = Math.max(...funnelSteps.map(s => typeof s.value === 'number' ? s.value : 0), 1);
+  let fHtml = '';
+  for (const step of funnelSteps) {
+    const pct = typeof step.value === 'number' ? Math.max((step.value / maxVal) * 100, 3) : 5;
+    fHtml += '<div class="funnel-step">'
+      + '<div class="funnel-label">' + step.label + '</div>'
+      + '<div class="funnel-bar-container"><div class="funnel-bar" style="width:' + pct + '%;background:' + step.color + '22;border-left:3px solid ' + step.color + ';"><span style="color:' + step.color + '">' + (typeof step.value === 'number' ? step.value.toLocaleString('pt-BR') : step.value) + '</span></div></div>'
+      + '<div class="funnel-value">' + (typeof step.value === 'number' ? step.value.toLocaleString('pt-BR') : step.value) + '</div>'
+      + '</div>';
+  }
+  document.getElementById('camp-funnel').innerHTML = fHtml;
+}
+
+function campRenderTemplates() {
+  let html = '';
+  for (const tpl of campTemplateData) {
+    const dotClass = tpl.status === 'approved' ? 'tpl-dot-approved' : tpl.status === 'rejected' ? 'tpl-dot-rejected' : 'tpl-dot-pending';
+    const statusLabel = tpl.status === 'approved' ? 'Aprovado' : tpl.status === 'rejected' ? 'Rejeitado' : 'Aguardando Meta...';
+    html += '<div class="tpl-card">'
+      + '<div class="tpl-name">' + tpl.name + '</div>'
+      + '<div style="font-size:12px;color:var(--sub);margin-bottom:8px;">Segmento: ' + tpl.segment + '</div>'
+      + '<div class="tpl-status"><span class="tpl-dot ' + dotClass + '"></span> ' + statusLabel + '</div>'
+      + '<div style="font-size:11px;color:var(--sub);margin-top:8px;">Meta ID: ' + tpl.metaId + '</div>'
+      + '</div>';
+  }
+  document.getElementById('camp-templates-grid').innerHTML = html;
+}
+
+async function campLoadContacts() {
+  try {
+    const { data, error } = await campSB.from('vw_segmentacao_cav').select('*');
+    if (error) throw error;
+    campAllContacts = data || [];
+    campFiltered = [...campAllContacts];
+    campPage = 0;
+    campRenderContacts();
+  } catch(e) {
+    console.error('Camp contacts error:', e);
+    document.getElementById('camp-contacts-body').innerHTML = '<tr><td colspan="5" style="padding:20px;color:var(--red);">Erro: ' + e.message + '</td></tr>';
+  }
+}
+
+function campFilterContacts() {
+  const q = (document.getElementById('camp-search').value || '').toLowerCase().trim();
+  const seg = document.getElementById('camp-seg-filter').value;
+  campFiltered = campAllContacts.filter(c => {
+    const matchSearch = !q || (c.nome && c.nome.toLowerCase().includes(q)) || (c.email && c.email.toLowerCase().includes(q));
+    const matchSeg = !seg || (c.segmento && c.segmento.toUpperCase() === seg);
+    return matchSearch && matchSeg;
+  });
+  campPage = 0;
+  campRenderContacts();
+}
+
+function campSort(col) {
+  if (campSortCol === col) { campSortAsc = !campSortAsc; } else { campSortCol = col; campSortAsc = true; }
+  campFiltered.sort((a, b) => {
+    let va = a[col] || '', vb = b[col] || '';
+    if (typeof va === 'number') return campSortAsc ? va - vb : vb - va;
+    return campSortAsc ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
+  });
+  campPage = 0;
+  campRenderContacts();
+}
+
+function campRenderContacts() {
+  const start = campPage * CAMP_PAGE_SIZE;
+  const end = start + CAMP_PAGE_SIZE;
+  const page = campFiltered.slice(start, end);
+  const totalPages = Math.ceil(campFiltered.length / CAMP_PAGE_SIZE);
+
+  document.getElementById('camp-contact-count').textContent = campFiltered.length.toLocaleString('pt-BR') + ' contatos';
+  document.getElementById('camp-page-info').textContent = 'Página ' + (campPage + 1) + ' de ' + (totalPages || 1);
+  document.getElementById('camp-prev-btn').disabled = campPage === 0;
+  document.getElementById('camp-next-btn').disabled = campPage >= totalPages - 1;
+
+  if (page.length === 0) {
+    document.getElementById('camp-contacts-body').innerHTML = '<tr><td colspan="5" style="padding:20px;text-align:center;color:var(--sub);">Nenhum contato encontrado</td></tr>';
+    return;
+  }
+
+  let html = '';
+  for (const c of page) {
+    const seg = (c.segmento || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    html += '<tr>'
+      + '<td>' + (c.nome || '—') + '</td>'
+      + '<td style="color:var(--sub)">' + (c.email || '—') + '</td>'
+      + '<td>' + (c.telefone || '<span style="color:var(--sub)">—</span>') + '</td>'
+      + '<td><span class="seg-tag seg-tag-' + seg + '">' + (c.segmento || '—') + '</span></td>'
+      + '<td style="text-align:center">' + (c.total_edicoes || '—') + '</td>'
+      + '</tr>';
+  }
+  document.getElementById('camp-contacts-body').innerHTML = html;
+}
+
+function campPrev() { if (campPage > 0) { campPage--; campRenderContacts(); } }
+function campNext() {
+  const totalPages = Math.ceil(campFiltered.length / CAMP_PAGE_SIZE);
+  if (campPage < totalPages - 1) { campPage++; campRenderContacts(); }
+}
+
+function switchCampTab(tab, btn) {
+  // Toggle chips
+  document.querySelectorAll('#subnav-campanha .chip').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  // Toggle tab panels
+  ['segmentos', 'funil', 'templates', 'contatos'].forEach(t => {
+    const el = document.getElementById('camp-tab-' + t);
+    if (el) el.style.display = t === tab ? 'block' : 'none';
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LOGIN GATE — senha geral
+// ═══════════════════════════════════════════════════════════════
+function doLogin() {
+  const pw = document.getElementById('login-pw').value;
+  if (pw === 'Eventos1mi') {
+    document.getElementById('login-gate').classList.add('hidden');
+  } else {
+    const err = document.getElementById('login-err');
+    err.style.display = 'block';
+    document.getElementById('login-pw').value = '';
+    setTimeout(() => err.style.display = 'none', 2500);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MARKETING GATE — senha específica
+// ═══════════════════════════════════════════════════════════════
+let mktUnlocked = false;
+let mktPendingUrl = '';
+
+function mktNav(url) {
+  if (mktUnlocked) {
+    window.open(url, '_blank');
+    return;
+  }
+  mktPendingUrl = url;
+  document.getElementById('mkt-gate').classList.add('open');
+  setTimeout(() => document.getElementById('mkt-pw').focus(), 100);
+}
+
+function doMktLogin() {
+  const pw = document.getElementById('mkt-pw').value;
+  if (pw === 'mktcav2026') {
+    mktUnlocked = true;
+    document.getElementById('mkt-gate').classList.remove('open');
+    document.getElementById('mkt-pw').value = '';
+    if (mktPendingUrl) window.open(mktPendingUrl, '_blank');
+  } else {
+    const err = document.getElementById('mkt-err');
+    err.style.display = 'block';
+    document.getElementById('mkt-pw').value = '';
+    setTimeout(() => err.style.display = 'none', 2500);
   }
 }
 
