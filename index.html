@@ -2182,7 +2182,7 @@
       <div class="page" id="page-trafego">
 
         <!-- Period Selector -->
-        <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;">
+        <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center;">
           <span style="font-size:11px;color:var(--sub);font-weight:600;">Período:</span>
           <button class="meta-period-btn active" data-period="today" onclick="switchMetaPeriod('today',this)">Hoje</button>
           <button class="meta-period-btn" data-period="last_7d" onclick="switchMetaPeriod('last_7d',this)">7 dias</button>
@@ -2195,81 +2195,106 @@
           .meta-period-btn.active{background:rgba(124,106,240,0.15);border-color:rgba(124,106,240,0.4);color:#c4b5fd;font-weight:600;}
           .meta-loading .kpi-value{animation:metaPulse 1.2s ease-in-out infinite;}
           @keyframes metaPulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+          .trafego-hero{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px;}
+          .trafego-hero-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;position:relative;overflow:hidden;}
+          .trafego-hero-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+          .trafego-hero-card.purple::before{background:linear-gradient(90deg,#7c6af0,#9b8cf5);}
+          .trafego-hero-card.green::before{background:linear-gradient(90deg,#22d3a0,#16ffbc);}
+          .trafego-hero-card.amber::before{background:linear-gradient(90deg,#f59e0b,#fbbf24);}
+          .trafego-hero-card.blue::before{background:linear-gradient(90deg,#38bdf8,#7dd3fc);}
+          .trafego-hero-card.red::before{background:linear-gradient(90deg,#f43f5e,#fb7185);}
+          .trafego-hero-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--sub);margin-bottom:10px;}
+          .trafego-hero-value{font-size:28px;font-weight:800;line-height:1;margin-bottom:6px;}
+          .trafego-hero-foot{font-size:11px;color:var(--sub);}
+          .trafego-hero-icon{position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:28px;opacity:0.15;}
         </style>
 
-        <!-- KPIs Meta Ads — LIVE -->
-        <div class="kpi-grid" style="grid-template-columns: repeat(5, 1fr);" id="meta-kpis">
-          <div class="kpi-card purple">
-            <div class="kpi-label">Investimento</div>
-            <div class="kpi-value" id="meta-spend">—</div>
-            <div class="kpi-footer" id="meta-spend-foot">Facebook Ads</div>
-            <div class="kpi-icon">💰</div>
+        <!-- HERO: 4 KPIs principais de tráfego -->
+        <div class="trafego-hero" id="meta-kpis">
+          <div class="trafego-hero-card purple">
+            <div class="trafego-hero-label">Investimento</div>
+            <div class="trafego-hero-value" id="meta-spend" style="color:#c4b5fd;">—</div>
+            <div class="trafego-hero-foot" id="meta-spend-foot">Facebook Ads</div>
+            <div class="trafego-hero-icon">💰</div>
           </div>
-          <div class="kpi-card blue">
-            <div class="kpi-label">Impressões</div>
-            <div class="kpi-value" id="meta-impressions">—</div>
-            <div class="kpi-footer" id="meta-impressions-foot">vezes exibido</div>
-            <div class="kpi-icon">👁️</div>
+          <div class="trafego-hero-card green">
+            <div class="trafego-hero-label">CPC Médio</div>
+            <div class="trafego-hero-value" id="meta-cpc" style="color:#22d3a0;">—</div>
+            <div class="trafego-hero-foot">custo por clique no link</div>
+            <div class="trafego-hero-icon">📊</div>
           </div>
-          <div class="kpi-card green">
-            <div class="kpi-label">Alcance</div>
-            <div class="kpi-value" id="meta-reach">—</div>
-            <div class="kpi-footer" id="meta-reach-foot">pessoas únicas</div>
-            <div class="kpi-icon">👥</div>
+          <div class="trafego-hero-card amber">
+            <div class="trafego-hero-label">Cliques no Link</div>
+            <div class="trafego-hero-value" id="meta-clicks" style="color:#fbbf24;">—</div>
+            <div class="trafego-hero-foot" id="meta-clicks-foot">CTR: —</div>
+            <div class="trafego-hero-icon">🔗</div>
           </div>
-          <div class="kpi-card amber">
-            <div class="kpi-label">Cliques no Link</div>
-            <div class="kpi-value" id="meta-clicks">—</div>
-            <div class="kpi-footer" id="meta-clicks-foot">CTR: —</div>
-            <div class="kpi-icon">🔗</div>
-          </div>
-          <div class="kpi-card green">
-            <div class="kpi-label">Visitas na LP</div>
-            <div class="kpi-value" id="meta-lpv">—</div>
-            <div class="kpi-footer" id="meta-lpv-foot">Custo/visita: —</div>
-            <div class="kpi-icon">🎯</div>
+          <div class="trafego-hero-card blue">
+            <div class="trafego-hero-label">Visitas na LP</div>
+            <div class="trafego-hero-value" id="meta-lpv" style="color:#7dd3fc;">—</div>
+            <div class="trafego-hero-foot" id="meta-lpv-foot">Custo/visita: —</div>
+            <div class="trafego-hero-icon">🎯</div>
           </div>
         </div>
 
-        <!-- KPIs secundários -->
-        <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr);margin-top:0;" id="meta-kpis-2">
+        <!-- KPIs secundários: Alcance, Impressões, Frequência, Campanha, Orçamento -->
+        <div class="kpi-grid" style="grid-template-columns: repeat(5, 1fr);margin-top:0;" id="meta-kpis-2">
           <div class="kpi-card" style="border-color:rgba(124,106,240,0.12);">
-            <div class="kpi-label">CPC Médio</div>
-            <div class="kpi-value" id="meta-cpc" style="font-size:24px;">—</div>
-            <div class="kpi-footer">custo por clique</div>
-            <div class="kpi-icon">📊</div>
+            <div class="kpi-label">Impressões</div>
+            <div class="kpi-value" id="meta-impressions" style="font-size:22px;">—</div>
+            <div class="kpi-footer" id="meta-impressions-foot">vezes exibido</div>
+            <div class="kpi-icon">👁️</div>
+          </div>
+          <div class="kpi-card" style="border-color:rgba(124,106,240,0.12);">
+            <div class="kpi-label">Alcance</div>
+            <div class="kpi-value" id="meta-reach" style="font-size:22px;">—</div>
+            <div class="kpi-footer" id="meta-reach-foot">pessoas únicas</div>
+            <div class="kpi-icon">👥</div>
           </div>
           <div class="kpi-card" style="border-color:rgba(124,106,240,0.12);">
             <div class="kpi-label">Frequência</div>
-            <div class="kpi-value" id="meta-freq" style="font-size:24px;">—</div>
+            <div class="kpi-value" id="meta-freq" style="font-size:22px;">—</div>
             <div class="kpi-footer">vezes/pessoa</div>
             <div class="kpi-icon">🔄</div>
           </div>
           <div class="kpi-card" style="border-color:rgba(124,106,240,0.12);">
             <div class="kpi-label">Campanha Ativa</div>
-            <div class="kpi-value" id="meta-camp-name" style="font-size:15px;">—</div>
+            <div class="kpi-value" id="meta-camp-name" style="font-size:14px;">—</div>
             <div class="kpi-footer" id="meta-camp-obj">—</div>
             <div class="kpi-icon">📢</div>
           </div>
           <div class="kpi-card" style="border-color:rgba(124,106,240,0.12);">
             <div class="kpi-label">Orçamento Diário</div>
-            <div class="kpi-value" id="meta-budget" style="font-size:24px;">—</div>
+            <div class="kpi-value" id="meta-budget" style="font-size:22px;">—</div>
             <div class="kpi-footer" id="meta-adset-name">—</div>
             <div class="kpi-icon">💳</div>
           </div>
         </div>
 
-        <!-- Charts Meta Ads -->
+        <!-- Charts: Gasto Diário + CPC Diário (principais) -->
         <div class="row2" style="margin-top:8px;">
           <div class="chart-card">
             <div class="section-header" style="margin-bottom:14px;">
               <div class="section-title">Investimento Diário (R$)</div>
-              <div class="section-sub">Últimos 30 dias</div>
+              <div class="section-sub">Últimos 30 dias · Gasto por dia</div>
             </div>
             <div class="chart-wrap" style="height:220px;">
               <canvas id="chartMetaSpend"></canvas>
             </div>
           </div>
+          <div class="chart-card">
+            <div class="section-header" style="margin-bottom:14px;">
+              <div class="section-title">CPC & Custo/LPV Diários</div>
+              <div class="section-sub">Evolução do custo por clique e por visita</div>
+            </div>
+            <div class="chart-wrap" style="height:220px;">
+              <canvas id="chartMetaCost"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts: Cliques/CTR + Alcance/Impressões -->
+        <div class="row2" style="margin-top:8px;">
           <div class="chart-card">
             <div class="section-header" style="margin-bottom:14px;">
               <div class="section-title">Cliques & CTR Diários</div>
@@ -2279,9 +2304,6 @@
               <canvas id="chartMetaClicks"></canvas>
             </div>
           </div>
-        </div>
-
-        <div class="row2" style="margin-top:8px;">
           <div class="chart-card">
             <div class="section-header" style="margin-bottom:14px;">
               <div class="section-title">Alcance & Impressões Diárias</div>
@@ -2291,246 +2313,38 @@
               <canvas id="chartMetaReach"></canvas>
             </div>
           </div>
-          <div class="chart-card">
-            <div class="section-header" style="margin-bottom:14px;">
-              <div class="section-title">Custo por Resultado</div>
-              <div class="section-sub">CPC e Custo por Landing Page View</div>
-            </div>
-            <div class="chart-wrap" style="height:220px;">
-              <canvas id="chartMetaCost"></canvas>
-            </div>
-          </div>
         </div>
 
         <div style="height:24px;"></div>
 
-        <!-- Diagnóstico Instagram -->
-        <div class="section-header" style="margin-bottom:16px;">
-          <div class="section-title">Diagnóstico Instagram · @jogoscav</div>
-          <div class="section-sub">Período: 19/02 a 17/03/2026 · 20 posts analisados</div>
-        </div>
-
-        <!-- KPIs Instagram -->
-        <div class="kpi-grid">
-          <div class="kpi-card purple">
-            <div class="kpi-label">Seguidores</div>
-            <div class="kpi-value" style="font-size:26px;">44.001</div>
-            <div class="kpi-footer">Ratio seguidor/seguindo: 8.6x</div>
-            <div class="kpi-icon">👥</div>
-          </div>
-          <div class="kpi-card green">
-            <div class="kpi-label">Alcance Total</div>
-            <div class="kpi-value" style="font-size:24px;">364.760</div>
-            <div class="kpi-footer">Média: 18.238/post</div>
-            <div class="kpi-icon">👁️</div>
-          </div>
-          <div class="kpi-card amber">
-            <div class="kpi-label">Visualizações</div>
-            <div class="kpi-value" style="font-size:24px;">775.376</div>
-            <div class="kpi-footer">2.15x views/alcance · Retenção alta</div>
-            <div class="kpi-icon">▶️</div>
-          </div>
-          <div class="kpi-card blue">
-            <div class="kpi-label">Engajamento s/ Alcance</div>
-            <div class="kpi-value">5,45%</div>
-            <div class="kpi-footer">Mercado: 1-2% <span class="kpi-tag tag-up">+172%</span></div>
-            <div class="kpi-icon">🔥</div>
-          </div>
-          <div class="kpi-card green">
-            <div class="kpi-label">Interações Totais</div>
-            <div class="kpi-value" style="font-size:24px;">26.061</div>
-            <div class="kpi-footer">Média: 1.303/post</div>
-            <div class="kpi-icon">💬</div>
-          </div>
-        </div>
-
-        <!-- Composição do Engajamento -->
-        <div class="row2" style="margin-top:8px;">
-          <div class="chart-card">
-            <div class="section-header" style="margin-bottom:14px;">
-              <div class="section-title">Composição das Interações</div>
-              <div class="section-sub">Curtidas, Compartilhamentos, Comentários e Salvamentos</div>
-            </div>
-            <div class="chart-wrap" style="height:240px;display:flex;align-items:center;justify-content:center;">
-              <canvas id="chartEngBreakdown"></canvas>
-            </div>
-          </div>
-          <div class="chart-card">
-            <div class="section-header" style="margin-bottom:14px;">
-              <div class="section-title">Reels vs Feed</div>
-              <div class="section-sub">Comparativo de alcance e interações médias por formato</div>
-            </div>
-            <div class="chart-wrap" style="height:240px;">
-              <canvas id="chartReelsFeed"></canvas>
-            </div>
-          </div>
-        </div>
-
-        <!-- Top 5 Posts -->
-        <div class="chart-card" style="margin-top:16px;margin-bottom:16px;">
+        <!-- Instagram Resumo Compacto -->
+        <div class="chart-card" style="margin-bottom:16px;">
           <div class="section-header" style="margin-bottom:14px;">
-            <div class="section-title">Top 5 Posts por Interações</div>
-            <div class="section-sub">Posts com maior engajamento no período</div>
+            <div class="section-title">Instagram @jogoscav · Resumo</div>
+            <div class="section-sub">Período: 19/02 a 17/03/2026 · 20 posts · Dados orgânicos</div>
           </div>
-          <div class="ranking-list" id="trafego-top5">
-            <div class="rank-item">
-              <div class="rank-pos gold">1</div>
-              <div class="rank-name" style="flex:2;">Orochi chegou</div>
-              <div style="font-size:11px;color:var(--sub);width:60px;">REELS</div>
-              <div style="font-size:12px;font-weight:700;color:var(--green);width:80px;text-align:right;">8.382</div>
-              <div style="font-size:11px;color:var(--sub);width:90px;text-align:right;">Alcance: 55.2k</div>
-              <div style="font-size:11px;font-weight:700;color:var(--amber2);width:60px;text-align:right;">15,2%</div>
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;">
+            <div style="text-align:center;padding:12px;background:rgba(124,106,240,0.06);border-radius:8px;">
+              <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--sub);margin-bottom:4px;">Seguidores</div>
+              <div style="font-size:20px;font-weight:800;color:var(--purple2);">44.001</div>
             </div>
-            <div class="rank-item">
-              <div class="rank-pos silver">2</div>
-              <div class="rank-name" style="flex:2;">DJ WS da Igrejinha</div>
-              <div style="font-size:11px;color:var(--sub);width:60px;">REELS</div>
-              <div style="font-size:12px;font-weight:700;color:var(--green);width:80px;text-align:right;">3.372</div>
-              <div style="font-size:11px;color:var(--sub);width:90px;text-align:right;">Alcance: 31.0k</div>
-              <div style="font-size:11px;font-weight:700;color:var(--amber2);width:60px;text-align:right;">10,9%</div>
+            <div style="text-align:center;padding:12px;background:rgba(34,211,160,0.06);border-radius:8px;">
+              <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--sub);margin-bottom:4px;">Alcance Total</div>
+              <div style="font-size:20px;font-weight:800;color:var(--green);">364.760</div>
             </div>
-            <div class="rank-item">
-              <div class="rank-pos bronze">3</div>
-              <div class="rank-name" style="flex:2;">Teaser celebridade</div>
-              <div style="font-size:11px;color:var(--sub);width:60px;">REELS</div>
-              <div style="font-size:12px;font-weight:700;color:var(--green);width:80px;text-align:right;">3.343</div>
-              <div style="font-size:11px;color:var(--sub);width:90px;text-align:right;">Alcance: 33.2k</div>
-              <div style="font-size:11px;font-weight:700;color:var(--amber2);width:60px;text-align:right;">10,1%</div>
+            <div style="text-align:center;padding:12px;background:rgba(245,158,11,0.06);border-radius:8px;">
+              <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--sub);margin-bottom:4px;">Visualizações</div>
+              <div style="font-size:20px;font-weight:800;color:var(--amber2);">775.376</div>
             </div>
-            <div class="rank-item">
-              <div class="rank-pos default">4</div>
-              <div class="rank-name" style="flex:2;">MU540 Confirmado</div>
-              <div style="font-size:11px;color:var(--sub);width:60px;">REELS</div>
-              <div style="font-size:12px;font-weight:700;color:var(--green);width:80px;text-align:right;">2.253</div>
-              <div style="font-size:11px;color:var(--sub);width:90px;text-align:right;">Alcance: 26.1k</div>
-              <div style="font-size:11px;font-weight:700;color:var(--amber2);width:60px;text-align:right;">8,6%</div>
+            <div style="text-align:center;padding:12px;background:rgba(56,189,248,0.06);border-radius:8px;">
+              <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--sub);margin-bottom:4px;">Engajamento</div>
+              <div style="font-size:20px;font-weight:800;color:var(--blue);">5,45%</div>
+              <div style="font-size:9px;color:var(--green);font-weight:700;margin-top:2px;">+172% vs mercado</div>
             </div>
-            <div class="rank-item">
-              <div class="rank-pos default">5</div>
-              <div class="rank-name" style="flex:2;">Processo Eleitoral</div>
-              <div style="font-size:11px;color:var(--sub);width:60px;">REELS</div>
-              <div style="font-size:12px;font-weight:700;color:var(--green);width:80px;text-align:right;">1.222</div>
-              <div style="font-size:11px;color:var(--sub);width:90px;text-align:right;">Alcance: 24.3k</div>
-              <div style="font-size:11px;font-weight:700;color:var(--amber2);width:60px;text-align:right;">5,0%</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Métricas detalhadas -->
-        <div class="row2">
-          <div class="chart-card">
-            <div class="section-header" style="margin-bottom:14px;">
-              <div class="section-title">Métricas por Formato</div>
-            </div>
-            <table>
-              <thead>
-                <tr>
-                  <th>Métrica</th>
-                  <th style="text-align:right">Reels (14)</th>
-                  <th style="text-align:right">Feed (6)</th>
-                  <th style="text-align:right">Diferença</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Alcance Médio</td>
-                  <td style="text-align:right;font-weight:600;color:var(--green);">21.229</td>
-                  <td style="text-align:right;">11.260</td>
-                  <td style="text-align:right;color:var(--green);font-weight:700;">+88%</td>
-                </tr>
-                <tr>
-                  <td>Interações Médias</td>
-                  <td style="text-align:right;font-weight:600;color:var(--green);">1.661</td>
-                  <td style="text-align:right;">469</td>
-                  <td style="text-align:right;color:var(--green);font-weight:700;">+254%</td>
-                </tr>
-                <tr>
-                  <td>Engajamento</td>
-                  <td style="text-align:right;font-weight:600;color:var(--green);">6,12%</td>
-                  <td style="text-align:right;">3,87%</td>
-                  <td style="text-align:right;color:var(--green);font-weight:700;">+58%</td>
-                </tr>
-                <tr>
-                  <td>Shares Médios</td>
-                  <td style="text-align:right;font-weight:600;color:var(--green);">654</td>
-                  <td style="text-align:right;">85</td>
-                  <td style="text-align:right;color:var(--green);font-weight:700;">+669%</td>
-                </tr>
-                <tr>
-                  <td>Views Médias</td>
-                  <td style="text-align:right;font-weight:600;color:var(--green);">43.369</td>
-                  <td style="text-align:right;">28.034</td>
-                  <td style="text-align:right;color:var(--green);font-weight:700;">+55%</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="chart-card">
-            <div class="section-header" style="margin-bottom:14px;">
-              <div class="section-title">Resumo Geral</div>
-            </div>
-            <table>
-              <thead>
-                <tr>
-                  <th>Indicador</th>
-                  <th style="text-align:right">Total</th>
-                  <th style="text-align:right">Média/Post</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Curtidas</td>
-                  <td style="text-align:right;font-weight:600;">14.181</td>
-                  <td style="text-align:right;">709</td>
-                </tr>
-                <tr>
-                  <td>Compartilhamentos</td>
-                  <td style="text-align:right;font-weight:600;color:var(--green);">9.667</td>
-                  <td style="text-align:right;">483</td>
-                </tr>
-                <tr>
-                  <td>Comentários</td>
-                  <td style="text-align:right;font-weight:600;">1.104</td>
-                  <td style="text-align:right;">55</td>
-                </tr>
-                <tr>
-                  <td>Salvamentos</td>
-                  <td style="text-align:right;font-weight:600;">184</td>
-                  <td style="text-align:right;">9,2</td>
-                </tr>
-                <tr>
-                  <td style="font-weight:700;">Total Interações</td>
-                  <td style="text-align:right;font-weight:700;color:var(--purple2);">26.061</td>
-                  <td style="text-align:right;font-weight:700;">1.303</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Recomendações -->
-        <div class="chart-card" style="margin-top:16px;">
-          <div class="section-header" style="margin-bottom:14px;">
-            <div class="section-title">Recomendações Estratégicas</div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-            <div style="background:rgba(34,211,160,0.06);border:1px solid rgba(34,211,160,0.15);border-radius:10px;padding:16px;">
-              <div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:8px;">✅ Pontos Fortes</div>
-              <div style="font-size:11.5px;color:var(--sub);line-height:1.6;">
-                • Domínio do formato Reels (3.5x mais interações)<br>
-                • Taxa de compartilhamento excepcional (38,5%)<br>
-                • Frequência de 5.6 posts/semana<br>
-                • Engajamento 172% acima da média do mercado
-              </div>
-            </div>
-            <div style="background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.15);border-radius:10px;padding:16px;">
-              <div style="font-size:12px;font-weight:700;color:var(--amber2);margin-bottom:8px;">⚡ Oportunidades</div>
-              <div style="font-size:11.5px;color:var(--sub);line-height:1.6;">
-                • Aumentar salvamentos (menos de 1% das interações)<br>
-                • Criar conteúdo informativo (line-up, mapas, cronograma)<br>
-                • Usar Feed apenas para comunicados oficiais<br>
-                • Incentivar disputas entre atléticas nos comentários
-              </div>
+            <div style="text-align:center;padding:12px;background:rgba(236,72,153,0.06);border-radius:8px;">
+              <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--sub);margin-bottom:4px;">Interações</div>
+              <div style="font-size:20px;font-weight:800;color:var(--pink);">26.061</div>
+              <div style="font-size:9px;color:var(--sub);margin-top:2px;">1.303/post</div>
             </div>
           </div>
         </div>
