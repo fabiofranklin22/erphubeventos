@@ -2367,6 +2367,7 @@
           <button class="chip active" onclick="switchCampTab('segmentos',this)">Segmentos</button>
           <button class="chip" onclick="switchCampTab('funil',this)">Funil</button>
           <button class="chip" onclick="switchCampTab('templates',this)">Templates</button>
+          <button class="chip" onclick="switchCampTab('disparo',this)">Disparo</button>
           <button class="chip" onclick="switchCampTab('contatos',this)">Contatos</button>
         </div>
 
@@ -2386,7 +2387,37 @@
 
         <!-- Templates -->
         <div id="camp-tab-templates" style="display:none;">
-          <div class="kpi-grid" id="camp-templates-grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));"></div>
+          <div class="kpi-grid" id="camp-templates-grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));"></div>
+        </div>
+
+        <!-- Disparo -->
+        <div id="camp-tab-disparo" style="display:none;">
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;">
+            <h3 style="margin:0 0 4px;font-size:16px;color:var(--text);">Central de Disparo WhatsApp</h3>
+            <p style="margin:0 0 20px;font-size:12px;color:var(--sub);">Envie mensagens em massa para cada segmento usando os templates aprovados pela Meta via Kapso API.</p>
+
+            <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+              <button class="chip active" onclick="campSelectAllSegments(this)" id="camp-disp-all">Todos os Segmentos</button>
+              <button class="chip" onclick="campToggleSegDisparo('fanatico',this)" id="camp-disp-fanatico">Fanático</button>
+              <button class="chip" onclick="campToggleSegDisparo('quente',this)" id="camp-disp-quente">Quente</button>
+              <button class="chip" onclick="campToggleSegDisparo('recente',this)" id="camp-disp-recente">Recente</button>
+              <button class="chip" onclick="campToggleSegDisparo('resgate',this)" id="camp-disp-resgate">Resgate</button>
+            </div>
+
+            <div id="camp-disparo-summary" style="background:var(--bg2);border-radius:10px;padding:16px;margin-bottom:16px;">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;" id="camp-disparo-cards"></div>
+            </div>
+
+            <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+              <button id="camp-btn-enviar" onclick="campIniciarDisparo()" style="background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;border:none;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(34,197,94,.3);">
+                <span style="font-size:18px;">📤</span> Iniciar Disparo
+              </button>
+              <span id="camp-disparo-status" style="font-size:12px;color:var(--sub);"></span>
+            </div>
+
+            <div id="camp-disparo-log" style="display:none;margin-top:16px;background:#0a0a0a;border:1px solid var(--border);border-radius:10px;padding:16px;max-height:300px;overflow-y:auto;font-family:monospace;font-size:11px;color:#22c55e;">
+            </div>
+          </div>
         </div>
 
         <!-- Contatos -->
@@ -6519,10 +6550,10 @@ const campSegmentDefs = [
 ];
 
 const campTemplateData = [
-  { name: 'cav2026_fanatico', segment: 'FANÁTICO', status: 'submitted', metaId: '1331157812168888' },
-  { name: 'cav2026_quente',   segment: 'QUENTE',   status: 'submitted', metaId: '1471481821224285' },
-  { name: 'cav2026_recente',  segment: 'RECENTE',  status: 'submitted', metaId: '969264105527244' },
-  { name: 'cav2026_resgate',  segment: 'RESGATE',  status: 'submitted', metaId: '918582494299500' }
+  { name: 'cav2026_fanatico', segment: 'FANÁTICO', status: 'approved', metaId: '1331157812168888', kapsoId: 'c4d30aae' },
+  { name: 'cav2026_quente',   segment: 'QUENTE',   status: 'approved', metaId: '1471481821224285', kapsoId: '380ba51c' },
+  { name: 'cav2026_recente',  segment: 'RECENTE',  status: 'approved', metaId: '969264105527244',  kapsoId: '5401a7c3' },
+  { name: 'cav2026_resgate',  segment: 'RESGATE',  status: 'approved', metaId: '918582494299500',  kapsoId: '7c397066' }
 ];
 
 function initCampSB() {
@@ -6625,12 +6656,14 @@ function campRenderTemplates() {
   let html = '';
   for (const tpl of campTemplateData) {
     const dotClass = tpl.status === 'approved' ? 'tpl-dot-approved' : tpl.status === 'rejected' ? 'tpl-dot-rejected' : 'tpl-dot-pending';
-    const statusLabel = tpl.status === 'approved' ? 'Aprovado' : tpl.status === 'rejected' ? 'Rejeitado' : 'Aguardando Meta...';
+    const statusLabel = tpl.status === 'approved' ? 'Aprovado pela Meta ✅' : tpl.status === 'rejected' ? 'Rejeitado' : 'Aguardando Meta...';
     html += '<div class="tpl-card">'
       + '<div class="tpl-name">' + tpl.name + '</div>'
       + '<div style="font-size:12px;color:var(--sub);margin-bottom:8px;">Segmento: ' + tpl.segment + '</div>'
       + '<div class="tpl-status"><span class="tpl-dot ' + dotClass + '"></span> ' + statusLabel + '</div>'
-      + '<div style="font-size:11px;color:var(--sub);margin-top:8px;">Meta ID: ' + tpl.metaId + '</div>'
+      + '<div style="font-size:10px;color:var(--sub);margin-top:8px;">Meta ID: ' + tpl.metaId + '</div>'
+      + (tpl.kapsoId ? '<div style="font-size:10px;color:var(--sub);margin-top:2px;">Kapso ID: ' + tpl.kapsoId + '</div>' : '')
+      + (tpl.status === 'approved' ? '<div style="margin-top:10px;"><span style="background:#22c55e22;color:#22c55e;padding:4px 10px;border-radius:6px;font-size:10px;font-weight:600;">PRONTO PARA ENVIO</span></div>' : '')
       + '</div>';
   }
   document.getElementById('camp-templates-grid').innerHTML = html;
@@ -6714,10 +6747,165 @@ function switchCampTab(tab, btn) {
   document.querySelectorAll('#subnav-campanha .chip').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
   // Toggle tab panels
-  ['segmentos', 'funil', 'templates', 'contatos'].forEach(t => {
+  ['segmentos', 'funil', 'templates', 'disparo', 'contatos'].forEach(t => {
     const el = document.getElementById('camp-tab-' + t);
     if (el) el.style.display = t === tab ? 'block' : 'none';
   });
+  if (tab === 'disparo') campRenderDisparoSummary();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DISPARO — Campaign Dispatch via Kapso API
+// ═══════════════════════════════════════════════════════════════
+let campDisparoSegmentos = ['fanatico', 'quente', 'recente', 'resgate'];
+let campDisparoRunning = false;
+
+function campSelectAllSegments(btn) {
+  campDisparoSegmentos = ['fanatico', 'quente', 'recente', 'resgate'];
+  document.querySelectorAll('#camp-tab-disparo .chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  campRenderDisparoSummary();
+}
+
+function campToggleSegDisparo(seg, btn) {
+  document.getElementById('camp-disp-all').classList.remove('active');
+  const idx = campDisparoSegmentos.indexOf(seg);
+  if (idx > -1) { campDisparoSegmentos.splice(idx, 1); btn.classList.remove('active'); }
+  else { campDisparoSegmentos.push(seg); btn.classList.add('active'); }
+  if (campDisparoSegmentos.length === 0) campSelectAllSegments(document.getElementById('camp-disp-all'));
+  campRenderDisparoSummary();
+}
+
+function campRenderDisparoSummary() {
+  const container = document.getElementById('camp-disparo-cards');
+  if (!container) return;
+  let html = '';
+  const segMap = { fanatico: { icon:'👑', color:'#a855f7', label:'Fanático' }, quente: { icon:'🔥', color:'#f97316', label:'Quente' }, recente: { icon:'🆕', color:'#3b82f6', label:'Recente' }, resgate: { icon:'📢', color:'#eab308', label:'Resgate' } };
+
+  let totalContacts = 0;
+  for (const seg of campDisparoSegmentos) {
+    const info = segMap[seg];
+    if (!info) continue;
+    // count from loaded contacts
+    const count = campAllContacts ? campAllContacts.filter(c => {
+      const s = (c.segmento || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      return s === seg && c.telefone && c.telefone.length > 5;
+    }).length : 0;
+    totalContacts += count;
+    const tpl = campTemplateData.find(t => t.segment.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') === seg);
+    html += '<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;">'
+      + '<div style="font-size:13px;font-weight:600;color:' + info.color + ';margin-bottom:6px;">' + info.icon + ' ' + info.label + '</div>'
+      + '<div style="font-size:20px;font-weight:700;color:var(--text);">' + count.toLocaleString('pt-BR') + '</div>'
+      + '<div style="font-size:10px;color:var(--sub);">contatos com telefone</div>'
+      + '<div style="font-size:10px;color:var(--sub);margin-top:4px;">Template: ' + (tpl ? tpl.name : '—') + '</div>'
+      + '<div style="font-size:10px;color:#22c55e;margin-top:2px;">✅ Aprovado</div>'
+      + '</div>';
+  }
+  container.innerHTML = html;
+  document.getElementById('camp-disparo-status').textContent = totalContacts.toLocaleString('pt-BR') + ' mensagens serão enviadas';
+}
+
+async function campIniciarDisparo() {
+  if (campDisparoRunning) return;
+  if (!campSB) { initCampSB(); if (!campSB) { alert('Erro: Supabase não conectado'); return; } }
+
+  const confirmed = confirm('Confirma o disparo de WhatsApp para ' + campDisparoSegmentos.length + ' segmento(s)? Isso vai enviar mensagens reais via Kapso.');
+  if (!confirmed) return;
+
+  campDisparoRunning = true;
+  const btn = document.getElementById('camp-btn-enviar');
+  btn.disabled = true;
+  btn.style.opacity = '0.6';
+  btn.innerHTML = '<span style="font-size:18px;">⏳</span> Enviando...';
+
+  const logEl = document.getElementById('camp-disparo-log');
+  logEl.style.display = 'block';
+  logEl.innerHTML = '';
+
+  function log(msg, color) {
+    const ts = new Date().toLocaleTimeString('pt-BR');
+    logEl.innerHTML += '<div style="color:' + (color || '#22c55e') + ';">[' + ts + '] ' + msg + '</div>';
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  log('Iniciando disparo para segmentos: ' + campDisparoSegmentos.join(', '));
+
+  let totalEnviado = 0;
+  let totalErro = 0;
+
+  for (const seg of campDisparoSegmentos) {
+    const tpl = campTemplateData.find(t => t.segment.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') === seg);
+    if (!tpl) { log('Template não encontrado para segmento ' + seg, '#ef4444'); continue; }
+
+    log('Carregando contatos do segmento ' + seg.toUpperCase() + '...');
+
+    try {
+      const { data, error } = await campSB.from('vw_seg_' + seg).select('*');
+      if (error) throw error;
+      const contacts = (data || []).filter(c => c.telefone && c.telefone.length > 5);
+      log('Encontrados ' + contacts.length + ' contatos com telefone no segmento ' + seg.toUpperCase());
+
+      // Send in batches of 50
+      const batchSize = 50;
+      for (let i = 0; i < contacts.length; i += batchSize) {
+        const batch = contacts.slice(i, i + batchSize);
+        const phones = batch.map(c => {
+          let tel = c.telefone.replace(/\D/g, '');
+          if (tel.length === 11) tel = '55' + tel;
+          if (tel.length === 10) tel = '55' + tel;
+          return tel;
+        });
+
+        log('Enviando lote ' + (Math.floor(i/batchSize)+1) + '/' + Math.ceil(contacts.length/batchSize) + ' (' + batch.length + ' msgs) — template: ' + tpl.name);
+
+        try {
+          // Kapso API dispatch endpoint
+          const resp = await fetch('https://api.kapso.com.br/v1/messages/batch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (window.KAPSO_API_KEY || '') },
+            body: JSON.stringify({
+              template_id: tpl.kapsoId,
+              meta_template_id: tpl.metaId,
+              phones: phones,
+              template_name: tpl.name
+            })
+          });
+
+          if (resp.ok) {
+            const result = await resp.json();
+            totalEnviado += batch.length;
+            log('✅ Lote enviado — ' + batch.length + ' mensagens (' + totalEnviado + ' total)', '#22c55e');
+          } else {
+            const errText = await resp.text();
+            totalErro += batch.length;
+            log('❌ Erro no lote: ' + resp.status + ' — ' + errText.substring(0, 100), '#ef4444');
+          }
+        } catch (fetchErr) {
+          totalErro += batch.length;
+          log('❌ Erro de conexão: ' + fetchErr.message, '#ef4444');
+        }
+
+        // Small delay between batches to avoid rate limiting
+        if (i + batchSize < contacts.length) {
+          await new Promise(r => setTimeout(r, 1000));
+        }
+      }
+    } catch (e) {
+      log('❌ Erro ao carregar segmento ' + seg + ': ' + e.message, '#ef4444');
+    }
+  }
+
+  log('');
+  log('═══════════════════════════════════════');
+  log('DISPARO FINALIZADO', '#60a5fa');
+  log('Enviadas: ' + totalEnviado + ' | Erros: ' + totalErro, totalErro > 0 ? '#eab308' : '#22c55e');
+  log('═══════════════════════════════════════');
+
+  campDisparoRunning = false;
+  btn.disabled = false;
+  btn.style.opacity = '1';
+  btn.innerHTML = '<span style="font-size:18px;">📤</span> Iniciar Disparo';
+  document.getElementById('camp-disparo-status').textContent = 'Concluído — ' + totalEnviado + ' enviadas, ' + totalErro + ' erros';
 }
 
 // ═══════════════════════════════════════════════════════════════
