@@ -571,22 +571,10 @@
       <span class="nav-icon">💬</span> CAV 2026 <span class="soon-badge" style="background:rgba(34,211,160,0.15);color:var(--green);">novo</span>
     </div>
 
-    <!-- ── MARKETING ── -->
-    <div class="sidebar-section">📈 Marketing</div>
-    <div class="nav-item" onclick="mktNav('https://marketingcav.manus.space/')">
-      <span class="nav-icon">📊</span> Performance <span style="font-size:9px;color:var(--muted);margin-left:auto;">↗</span>
-    </div>
-    <div class="nav-item" onclick="mktNav('https://marketingcav.manus.space/instagram')">
-      <span class="nav-icon">📸</span> Instagram <span style="font-size:9px;color:var(--muted);margin-left:auto;">↗</span>
-    </div>
-    <div class="nav-item" onclick="mktNav('https://marketingcav.manus.space/plano-de-midia')">
-      <span class="nav-icon">📋</span> Plano de Mídia <span style="font-size:9px;color:var(--muted);margin-left:auto;">↗</span>
-    </div>
-
-    <!-- ── TRÁFEGO PAGO ── -->
-    <div class="sidebar-section">📢 Tráfego Pago</div>
+    <!-- ── TRÁFEGO & MARKETING ── -->
+    <div class="sidebar-section">📢 Tráfego & Marketing</div>
     <div class="nav-item" data-section="trafego" data-event="cav2026" onclick="switchSection('trafego','cav2026',this)">
-      <span class="nav-icon">📊</span> CAV 2026
+      <span class="nav-icon">📊</span> Meta Ads · CAV 2026 <span style="font-size:8px;color:var(--green);margin-left:auto;">LIVE</span>
     </div>
     <!-- ── NIBO ── -->
     <div class="sidebar-section">💵 NIBO</div>
@@ -2193,33 +2181,128 @@
       </div><!-- /producao -->
       <div class="page" id="page-trafego">
 
-        <!-- KPIs Campanha Facebook Ads -->
-        <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr);">
-          <div class="kpi-card green">
-            <div class="kpi-label">Status da Campanha</div>
-            <div class="kpi-value" style="font-size:22px;">Em Reconhecimento</div>
-            <div class="kpi-footer">Facebook Ads · Ativo <span class="kpi-tag tag-up">Ativo</span></div>
-            <div class="kpi-icon">🟢</div>
-          </div>
-          <div class="kpi-card amber">
-            <div class="kpi-label">Orçamento Diário</div>
-            <div class="kpi-value">R$ 20</div>
-            <div class="kpi-footer">Média diária · Clique no link</div>
+        <!-- Period Selector -->
+        <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;">
+          <span style="font-size:11px;color:var(--sub);font-weight:600;">Período:</span>
+          <button class="meta-period-btn active" data-period="today" onclick="switchMetaPeriod('today',this)">Hoje</button>
+          <button class="meta-period-btn" data-period="last_7d" onclick="switchMetaPeriod('last_7d',this)">7 dias</button>
+          <button class="meta-period-btn" data-period="last_30d" onclick="switchMetaPeriod('last_30d',this)">30 dias</button>
+          <span id="meta-last-update" style="margin-left:auto;font-size:10px;color:var(--sub);">Carregando...</span>
+        </div>
+        <style>
+          .meta-period-btn{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:var(--sub);font-size:11px;padding:4px 14px;border-radius:6px;cursor:pointer;transition:all .2s;}
+          .meta-period-btn:hover{border-color:rgba(124,106,240,0.3);color:#fff;}
+          .meta-period-btn.active{background:rgba(124,106,240,0.15);border-color:rgba(124,106,240,0.4);color:#c4b5fd;font-weight:600;}
+          .meta-loading .kpi-value{animation:metaPulse 1.2s ease-in-out infinite;}
+          @keyframes metaPulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+        </style>
+
+        <!-- KPIs Meta Ads — LIVE -->
+        <div class="kpi-grid" style="grid-template-columns: repeat(5, 1fr);" id="meta-kpis">
+          <div class="kpi-card purple">
+            <div class="kpi-label">Investimento</div>
+            <div class="kpi-value" id="meta-spend">—</div>
+            <div class="kpi-footer" id="meta-spend-foot">Facebook Ads</div>
             <div class="kpi-icon">💰</div>
           </div>
-          <div class="kpi-card purple">
-            <div class="kpi-label">Saldo Disponível</div>
-            <div class="kpi-value">R$ 141</div>
-            <div class="kpi-footer">~7 dias de veiculação restantes</div>
-            <div class="kpi-icon">💳</div>
-          </div>
           <div class="kpi-card blue">
-            <div class="kpi-label">Anúncio Ativo</div>
-            <div class="kpi-value" style="font-size:18px;">3º Lote</div>
-            <div class="kpi-footer">AD - Atrações CAV San Francisco</div>
-            <div class="kpi-icon">📢</div>
+            <div class="kpi-label">Impressões</div>
+            <div class="kpi-value" id="meta-impressions">—</div>
+            <div class="kpi-footer" id="meta-impressions-foot">vezes exibido</div>
+            <div class="kpi-icon">👁️</div>
+          </div>
+          <div class="kpi-card green">
+            <div class="kpi-label">Alcance</div>
+            <div class="kpi-value" id="meta-reach">—</div>
+            <div class="kpi-footer" id="meta-reach-foot">pessoas únicas</div>
+            <div class="kpi-icon">👥</div>
+          </div>
+          <div class="kpi-card amber">
+            <div class="kpi-label">Cliques no Link</div>
+            <div class="kpi-value" id="meta-clicks">—</div>
+            <div class="kpi-footer" id="meta-clicks-foot">CTR: —</div>
+            <div class="kpi-icon">🔗</div>
+          </div>
+          <div class="kpi-card green">
+            <div class="kpi-label">Visitas na LP</div>
+            <div class="kpi-value" id="meta-lpv">—</div>
+            <div class="kpi-footer" id="meta-lpv-foot">Custo/visita: —</div>
+            <div class="kpi-icon">🎯</div>
           </div>
         </div>
+
+        <!-- KPIs secundários -->
+        <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr);margin-top:0;" id="meta-kpis-2">
+          <div class="kpi-card" style="border-color:rgba(124,106,240,0.12);">
+            <div class="kpi-label">CPC Médio</div>
+            <div class="kpi-value" id="meta-cpc" style="font-size:24px;">—</div>
+            <div class="kpi-footer">custo por clique</div>
+            <div class="kpi-icon">📊</div>
+          </div>
+          <div class="kpi-card" style="border-color:rgba(124,106,240,0.12);">
+            <div class="kpi-label">Frequência</div>
+            <div class="kpi-value" id="meta-freq" style="font-size:24px;">—</div>
+            <div class="kpi-footer">vezes/pessoa</div>
+            <div class="kpi-icon">🔄</div>
+          </div>
+          <div class="kpi-card" style="border-color:rgba(124,106,240,0.12);">
+            <div class="kpi-label">Campanha Ativa</div>
+            <div class="kpi-value" id="meta-camp-name" style="font-size:15px;">—</div>
+            <div class="kpi-footer" id="meta-camp-obj">—</div>
+            <div class="kpi-icon">📢</div>
+          </div>
+          <div class="kpi-card" style="border-color:rgba(124,106,240,0.12);">
+            <div class="kpi-label">Orçamento Diário</div>
+            <div class="kpi-value" id="meta-budget" style="font-size:24px;">—</div>
+            <div class="kpi-footer" id="meta-adset-name">—</div>
+            <div class="kpi-icon">💳</div>
+          </div>
+        </div>
+
+        <!-- Charts Meta Ads -->
+        <div class="row2" style="margin-top:8px;">
+          <div class="chart-card">
+            <div class="section-header" style="margin-bottom:14px;">
+              <div class="section-title">Investimento Diário (R$)</div>
+              <div class="section-sub">Últimos 30 dias</div>
+            </div>
+            <div class="chart-wrap" style="height:220px;">
+              <canvas id="chartMetaSpend"></canvas>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="section-header" style="margin-bottom:14px;">
+              <div class="section-title">Cliques & CTR Diários</div>
+              <div class="section-sub">Link clicks + taxa de clique</div>
+            </div>
+            <div class="chart-wrap" style="height:220px;">
+              <canvas id="chartMetaClicks"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="row2" style="margin-top:8px;">
+          <div class="chart-card">
+            <div class="section-header" style="margin-bottom:14px;">
+              <div class="section-title">Alcance & Impressões Diárias</div>
+              <div class="section-sub">Pessoas únicas vs total de exibições</div>
+            </div>
+            <div class="chart-wrap" style="height:220px;">
+              <canvas id="chartMetaReach"></canvas>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="section-header" style="margin-bottom:14px;">
+              <div class="section-title">Custo por Resultado</div>
+              <div class="section-sub">CPC e Custo por Landing Page View</div>
+            </div>
+            <div class="chart-wrap" style="height:220px;">
+              <canvas id="chartMetaCost"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div style="height:24px;"></div>
 
         <!-- Diagnóstico Instagram -->
         <div class="section-header" style="margin-bottom:16px;">
@@ -6343,7 +6426,207 @@ function pmSearch(val) {
 
 
 // ── TRÁFEGO PAGO CHARTS ──────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+// META ADS API — LIVE DATA
+// ══════════════════════════════════════════════════════════════════
+const META_TOKEN = 'EAAYSEu8UyxMBRD0jKdYFtK0NTMAMeg2UZCmpNWkeWbllUgaEjnlcRNh6By7izpaDxScQXW2uUblcoVEjtbGJ2WyjFeqdArgo4hVyKkvxFEPuESxiITYqnHA0NyMMqsJD225CUUR9mIKGiGWcoecygbEwsrplCeTRsbaUfi9jkEa6GAn7JQDJCJNyr0w64zQZDZD';
+const META_ACCOUNT = 'act_615779331834432';
+const META_CAMPAIGN = '6989890082453';
+const META_API = 'https://graph.facebook.com/v21.0';
+let metaCurrentPeriod = 'today';
+let metaChartsBuilt = false;
+let metaSpendChart, metaClicksChart, metaReachChart, metaCostChart;
+
+function metaFmt(n) { return n >= 1000 ? (n/1000).toFixed(1).replace('.0','') + 'k' : String(n); }
+function metaMoney(v) { return 'R$ ' + parseFloat(v).toFixed(2).replace('.', ','); }
+function metaActionVal(actions, type) {
+  if (!actions) return 0;
+  const a = actions.find(x => x.action_type === type);
+  return a ? parseInt(a.value) : 0;
+}
+function metaCostVal(costs, type) {
+  if (!costs) return 0;
+  const a = costs.find(x => x.action_type === type);
+  return a ? parseFloat(a.value) : 0;
+}
+
+async function metaFetch(endpoint) {
+  try {
+    const r = await fetch(endpoint);
+    return await r.json();
+  } catch(e) { console.error('Meta API error:', e); return { data: [] }; }
+}
+
+async function loadMetaKPIs(period) {
+  const fields = 'spend,impressions,reach,clicks,cpc,ctr,cpp,frequency,actions,cost_per_action_type';
+  const url = `${META_API}/${META_ACCOUNT}/insights?fields=${fields}&date_preset=${period}&access_token=${META_TOKEN}`;
+  const data = await metaFetch(url);
+  if (!data.data || !data.data[0]) {
+    document.getElementById('meta-spend').textContent = 'R$ 0';
+    document.getElementById('meta-impressions').textContent = '0';
+    document.getElementById('meta-reach').textContent = '0';
+    document.getElementById('meta-clicks').textContent = '0';
+    document.getElementById('meta-lpv').textContent = '0';
+    document.getElementById('meta-cpc').textContent = 'R$ 0';
+    document.getElementById('meta-freq').textContent = '0';
+    document.getElementById('meta-clicks-foot').textContent = 'CTR: 0%';
+    document.getElementById('meta-lpv-foot').textContent = 'Custo/visita: R$ 0';
+    return;
+  }
+  const d = data.data[0];
+  const linkClicks = metaActionVal(d.actions, 'link_click');
+  const lpv = metaActionVal(d.actions, 'landing_page_view');
+  const costLpv = metaCostVal(d.cost_per_action_type, 'landing_page_view');
+
+  document.getElementById('meta-spend').textContent = metaMoney(d.spend);
+  document.getElementById('meta-impressions').textContent = metaFmt(parseInt(d.impressions));
+  document.getElementById('meta-reach').textContent = metaFmt(parseInt(d.reach));
+  document.getElementById('meta-clicks').textContent = metaFmt(linkClicks);
+  document.getElementById('meta-lpv').textContent = metaFmt(lpv);
+  document.getElementById('meta-cpc').textContent = metaMoney(d.cpc);
+  document.getElementById('meta-freq').textContent = parseFloat(d.frequency).toFixed(2);
+  document.getElementById('meta-clicks-foot').textContent = 'CTR: ' + parseFloat(d.ctr).toFixed(2) + '%';
+  document.getElementById('meta-lpv-foot').textContent = 'Custo/visita: ' + metaMoney(costLpv);
+  document.getElementById('meta-spend-foot').textContent = period === 'today' ? 'Hoje' : period === 'last_7d' ? 'Últimos 7 dias' : 'Últimos 30 dias';
+  document.getElementById('meta-last-update').textContent = 'Atualizado: ' + new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+}
+
+async function loadMetaCampaigns() {
+  const url = `${META_API}/${META_ACCOUNT}/campaigns?fields=name,status,objective,daily_budget,lifetime_budget&access_token=${META_TOKEN}`;
+  const data = await metaFetch(url);
+  if (data.data) {
+    const active = data.data.find(c => c.status === 'ACTIVE');
+    if (active) {
+      document.getElementById('meta-camp-name').textContent = active.name.replace('CAV 2026 - ', '');
+      const objMap = { OUTCOME_TRAFFIC: 'Tráfego', OUTCOME_ENGAGEMENT: 'Engajamento', OUTCOME_AWARENESS: 'Reconhecimento', OUTCOME_LEADS: 'Leads' };
+      document.getElementById('meta-camp-obj').textContent = 'Objetivo: ' + (objMap[active.objective] || active.objective);
+    }
+  }
+  // Adsets
+  const url2 = `${META_API}/${META_CAMPAIGN}/adsets?fields=name,status,daily_budget,optimization_goal&access_token=${META_TOKEN}`;
+  const data2 = await metaFetch(url2);
+  if (data2.data) {
+    const active = data2.data.find(a => a.status === 'ACTIVE');
+    if (active) {
+      document.getElementById('meta-budget').textContent = metaMoney(parseInt(active.daily_budget) / 100);
+      document.getElementById('meta-adset-name').textContent = active.name;
+    }
+  }
+}
+
+async function loadMetaDailyCharts() {
+  const fields = 'spend,impressions,reach,clicks,cpc,ctr,actions,cost_per_action_type';
+  const url = `${META_API}/${META_ACCOUNT}/insights?fields=${fields}&date_preset=last_30d&time_increment=1&limit=31&access_token=${META_TOKEN}`;
+  const data = await metaFetch(url);
+  if (!data.data || !data.data.length) return;
+
+  const days = data.data;
+  const labels = days.map(d => { const dt = d.date_start.split('-'); return dt[2] + '/' + dt[1]; });
+  const spends = days.map(d => parseFloat(d.spend));
+  const impressions = days.map(d => parseInt(d.impressions));
+  const reaches = days.map(d => parseInt(d.reach));
+  const clicks = days.map(d => metaActionVal(d.actions, 'link_click'));
+  const ctrs = days.map(d => parseFloat(d.ctr));
+  const cpcs = days.map(d => parseFloat(d.cpc));
+  const costLpvs = days.map(d => metaCostVal(d.cost_per_action_type, 'landing_page_view'));
+
+  const commonOpts = {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { labels: { color: '#8892a4', font: { size: 10 }, usePointStyle: true, padding: 10 } } },
+    scales: {
+      x: { ticks: { color: '#4a556a', font: { size: 9 }, maxRotation: 0 }, grid: { display: false } },
+      y: { ticks: { color: '#4a556a', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.04)' } }
+    }
+  };
+
+  // Spend Chart
+  const ctx1 = document.getElementById('chartMetaSpend');
+  if (ctx1) {
+    if (metaSpendChart) metaSpendChart.destroy();
+    metaSpendChart = new Chart(ctx1, {
+      type: 'bar',
+      data: { labels, datasets: [{ label: 'Gasto (R$)', data: spends, backgroundColor: 'rgba(124,106,240,0.6)', borderRadius: 4 }] },
+      options: { ...commonOpts, scales: { ...commonOpts.scales, y: { ...commonOpts.scales.y, ticks: { ...commonOpts.scales.y.ticks, callback: v => 'R$' + v.toFixed(0) } } } }
+    });
+  }
+
+  // Clicks + CTR Chart
+  const ctx2 = document.getElementById('chartMetaClicks');
+  if (ctx2) {
+    if (metaClicksChart) metaClicksChart.destroy();
+    metaClicksChart = new Chart(ctx2, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Link Clicks', data: clicks, backgroundColor: 'rgba(34,211,160,0.6)', borderRadius: 4, yAxisID: 'y' },
+          { label: 'CTR %', data: ctrs, type: 'line', borderColor: '#f59e0b', backgroundColor: 'transparent', pointRadius: 2, borderWidth: 2, yAxisID: 'y1' }
+        ]
+      },
+      options: {
+        ...commonOpts,
+        scales: {
+          ...commonOpts.scales,
+          y1: { position: 'right', ticks: { color: '#f59e0b', font: { size: 9 }, callback: v => v.toFixed(1) + '%' }, grid: { display: false } }
+        }
+      }
+    });
+  }
+
+  // Reach & Impressions
+  const ctx3 = document.getElementById('chartMetaReach');
+  if (ctx3) {
+    if (metaReachChart) metaReachChart.destroy();
+    metaReachChart = new Chart(ctx3, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Impressões', data: impressions, borderColor: '#7c6af0', backgroundColor: 'rgba(124,106,240,0.1)', fill: true, pointRadius: 2, borderWidth: 2 },
+          { label: 'Alcance', data: reaches, borderColor: '#22d3a0', backgroundColor: 'rgba(34,211,160,0.1)', fill: true, pointRadius: 2, borderWidth: 2 }
+        ]
+      },
+      options: { ...commonOpts, scales: { ...commonOpts.scales, y: { ...commonOpts.scales.y, ticks: { ...commonOpts.scales.y.ticks, callback: v => metaFmt(v) } } } }
+    });
+  }
+
+  // Cost per Result
+  const ctx4 = document.getElementById('chartMetaCost');
+  if (ctx4) {
+    if (metaCostChart) metaCostChart.destroy();
+    metaCostChart = new Chart(ctx4, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          { label: 'CPC (R$)', data: cpcs, borderColor: '#38bdf8', pointRadius: 2, borderWidth: 2, fill: false },
+          { label: 'Custo/LPV (R$)', data: costLpvs, borderColor: '#f97316', pointRadius: 2, borderWidth: 2, fill: false }
+        ]
+      },
+      options: { ...commonOpts, scales: { ...commonOpts.scales, y: { ...commonOpts.scales.y, ticks: { ...commonOpts.scales.y.ticks, callback: v => 'R$' + v.toFixed(2) } } } }
+    });
+  }
+}
+
+function switchMetaPeriod(period, btn) {
+  metaCurrentPeriod = period;
+  document.querySelectorAll('.meta-period-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.getElementById('meta-kpis').classList.add('meta-loading');
+  loadMetaKPIs(period).then(() => {
+    document.getElementById('meta-kpis').classList.remove('meta-loading');
+  });
+}
+
 function buildTrafegoCharts() {
+  // Load Meta Ads data
+  loadMetaKPIs(metaCurrentPeriod);
+  loadMetaCampaigns();
+  if (!metaChartsBuilt) {
+    metaChartsBuilt = true;
+    loadMetaDailyCharts();
+  }
+
   // Engagement Breakdown Donut
   const ctxEng = document.getElementById('chartEngBreakdown');
   if (ctxEng && !ctxEng._built) {
